@@ -1,0 +1,104 @@
+{% extends "index.html" %}
+{% load url from future %}
+
+{% block blk_blogs %} 
+    <div class="row">
+        <div class="span6" id="divBlogs">
+        {% for blog in blogs %}
+            <div class="row">
+                <div class="span6 text-info">
+                    <h4><i class="icon-align-right"></i>&nbsp;{{ blog.title }}</h4>
+                </div>
+            </div>
+            <div class="row">
+                <div class="span4">
+                    <small class="text-info">标签：<span class="muted">{% for tag in blog.tags.all %}
+                    {{ tag.name }}&nbsp;{% endfor %}</span></small>
+                </div>
+                <div class="span2 text-right">
+                    <small>{{ blog.create_time.year }}.{{ blog.create_time.month }}.{{ blog.create_time.day }}</small>
+                </div>
+            </div>
+            <br/>
+            <div class="row">
+                <div class="span6">
+                    <p>{{ blog.contents }}</p>
+                </div>
+            </div>
+            <br/>
+            <div class="row">
+                <div class="span2 muted">
+                    <small>浏览次数：{{ blog.scan }}</small>
+                </div>
+                <div class="span2 offset2 text-right">
+                    <a class="btn btn-link btn-medium pull-right" href="/blog/{{ blog.id }}">
+                    <i class="icon-eye-open"></i>&nbsp;&nbsp;阅读全文
+                    </a>
+                </div>
+            </div>
+            <hr/>
+        {% endfor %}
+        </div>
+    </div>
+    <br/>
+
+    <div class="row">
+        <div class="span5" id="divMore" >
+            <a class="btn btn-medium span5" id="aMore">点击查看更多</a>
+        </div>
+    </div>
+    <br/>
+    <br/>
+{% endblock %}
+
+
+{% block js_init %}
+    var this_times = 1;
+    $("#aMore").click(function(){
+        $.get("{% url 'blog.views.home_blogs' %}",{more_data:"1", times:this_times},
+            function(data){
+                if(data){
+                    if(data=="1")
+                    {
+                        $("#aMore").html("没有更多文章");
+                        return;
+                    }
+                    data = eval("("+data+")");
+                    $.each(data , function(key, val){
+                        var str_HTML = '<div class="row"><div class="span6 text-info"><h4>'+
+                                        '<i class="icon-align-right"></i>&nbsp;'+val.blog_title+'</h4></div></div>'+
+                                        '<div class="row"><div class="span4"><small class="text-info">'+
+                                        '标签：<span class="muted">';
+                        $.each(val.blog_tags, function(k, v){
+                            str_HTML += v.tag_name+' ';
+                        });
+                        str_HTML += '</span></small></div><div class="span2 text-right"><small>'+
+                                        val.blog_ctime.split(' ')[0]+'</small>'+
+                                        '</div></div><br/><div class="row"><div class="span6"><p>'+
+                                        val.blog_contents+'</p></div></div><br/><div class="row">'+
+                                        '<div class="span2 muted"><small>浏览次数：'+val.blog_scan+'</small></div>'+
+                                        '<div class="span2 offset2 text-right">'+
+                                        '<a class="btn btn-link btn-medium pull-right" href="/blog/'+val.blog_id+'">'+
+                                        '<i class="icon-eye-open"></i>&nbsp;&nbsp;阅读全文</a></div></div><hr/>';
+                        $("#divBlogs").append(str_HTML);
+                        });
+                }
+                else{
+                    alert("sth wrong!");
+                }
+        });
+        this_times += 1;    //next 5 blogs
+    });
+{% endblock %}
+
+{% block blk_tags %}
+{% include "tags.html" %}
+{% endblock %}
+
+{% block blk_arch %}
+{% include "arch.html" %}
+{% endblock %}
+
+{% block blk_stats %}
+{% include "stats.html" %}
+{% endblock %}

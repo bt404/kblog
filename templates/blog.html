@@ -1,0 +1,184 @@
+{% extends "index.html" %}
+{% load url from future %}
+
+{% block blk_blogs %}
+<script>
+function btnClick(){
+    var user = $("#txtUser").val();
+    var email= $("#txtEmail").val();
+    var content = $("#txtContent").val().replace(/\n/g,"<br/>");
+    
+    var ret = submit_valid(user, email, content);
+    switch(ret)
+    {
+        case 1:
+            $("#divWarning").html("昵称不得为空");
+            break;
+        case 2:
+            $("#divWarning").html("邮箱不得为空");
+            break;
+        case 3:
+            $("#divWarning").html("评论内容不得为空");
+            break;
+        case 4:
+            $("#divWarning").html("邮箱格式错误");
+            break;
+        case 5:
+            $("#divWarning").html("内容长度不得低于5个字");
+            break;
+        default:
+            $("#txtUser").val("");
+            $("#txtEmail").val("");
+            $("#txtContent").val("");
+            $.post("{% url 'blog.views.show_blog' blog.id %}",
+                    {"user":user,"email":email,"content":content},
+                    function(data){
+                        if(data){
+                            $("#divComment").append("<div class='row'><div class='span2 text-info'>"+user+"</div><div class='span2 offset2 muted text-right'><p>"+data+"</p></div></div><br/><div class='row'><div class='span6'>"+content+"</div></div><br/><hr/>");
+                        }
+                        else{
+                            alert("评论提交失败！");
+                        }
+                    });
+            break;
+    }
+
+}
+
+function submit_valid(user, email, content){    //验证输入
+    if(!user)   //用户名非空
+    {
+        return 1;
+    }
+    if(!email)  //email非空
+    {
+        return 2;
+    }
+    var re = /^([a-z0-9_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$/;
+    if(!re.test(email)) //邮箱格式
+    {
+        return 4;
+    }
+    if(!content)    //内容非空
+    {
+        return 3;
+    }
+    if(content.length<5)    //内容长度
+    {
+        return 5;
+    }
+    return 0;   //验证成功
+}
+
+</script>
+
+<div class="row">
+    <div class="span6 text-info">
+        <h4><i class="icon-align-right"></i>&nbsp;{{ blog.title }}</h4>
+    </div>
+</div>
+
+<div class="row">
+    <div class="span4">
+        <small class="text-info">标签：<span class="muted">{% for tag in blog.tags.all %}
+    	        {{ tag.name }}&nbsp;{% endfor %}</span></small>
+    </div>
+    <div class="span2 text-right muted">
+        <small>{{ blog.create_time.year }}.{{ blog.create_time.month }}.{{ blog.create_time.day }}</small>
+    </div>
+</div>
+<br/>
+<div class="row">
+    <div class="span6">
+        <p>{{ blog.contents|safe }}</p>
+    </div>
+</div>
+<br/>
+<div class="row">
+    <div class="span2 muted offset4 text-right">
+        <small>浏览次数：{{ blog.scan }}</small>
+    </div>
+</div>
+<br/>
+<hr/>
+<div class="row">
+    <div class="span2 text-info">
+        <h4><i class="icon-align-right"></i>&nbsp;评&nbsp;&nbsp;论</h4>
+    </div>
+</div>
+<br/>
+
+<div class="row">
+    <div class="span6" id="divComment">
+        {% for comment in comments %}
+        <div class="row">
+            <div class="span2 text-info">
+                {{ comment.user_name }}
+            </div>
+            <div class="span2 offset2 muted text-right"> 
+                <p>{{ comment.comment_time.year }}-{{ comment.comment_time|date:"m" }}-{{ comment.comment_time|date:"d" }}&nbsp;{{ comment.comment_time|date:"H" }}:{{ comment.comment_time|date:"i" }}</p>
+            </div>
+        </div>
+        <br/>
+        <div class="row">
+            <div class="span6">
+                {{ comment.content|safe }}
+            </div>
+        </div>
+        <br/>
+        <hr/>
+        {% endfor %}
+    </div>
+</div>
+<br/>
+<br/>
+
+
+<div class="row" id="divNick">
+    <div class="span1 text-right text-info">
+        昵&nbsp;称：
+    </div>
+    <div class="span5">
+        <input type="text" class="span5" name="txtUser" id="txtUser" placeholder="请输入用户名（必填）"/>
+    </div>
+</div>
+
+<div class="row" id="divEmail">
+    <div class="span1 text-right text-info">
+        邮&nbsp;箱：
+    </div>
+    <div class="span5">
+        <input type="text" class="span5" name="txtEmail" id="txtEmail" placeholder="请输入Email（必填）" /><br/>
+    </div>
+</div>
+
+<div class="row" id="divContent">
+    <div class="span1 text-right text-info">
+        评&nbsp;论：<br/>
+    </div>
+    <div class="span5">
+        <textarea name="txtContent" id="txtContent"  rows="5" class="span5" placeholder="请输入评论，不得少于5个字（必填）" ></textarea><br/>
+    </div>
+</div>
+<div class="row">
+    <div class="span2 offset1 text-error" id="divWarning">
+    </div>
+    <div class="span3 text-right">
+        <input type="submit" class="btn btn-info" onclick="btnClick()" value="提交"/>
+    </div>
+</div>
+<br/>
+<br/>
+{% endblock %}
+
+{% block blk_tags %}
+{% include "tags.html" %}
+{% endblock %}
+
+{% block blk_arch %}
+{% include "arch.html" %}
+{% endblock %}
+
+{% block blk_stats %}
+{% include "stats.html" %}
+{% endblock %}

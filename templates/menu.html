@@ -1,0 +1,50 @@
+{% extends "index.html" %}
+
+{% block blk_blogs %} 
+<div class="row">
+<div class="span6">
+
+
+<div class="row">
+    <div class="span2 text-info">
+        {% if menuname %}
+            <h4><i class="icon-align-right"></i>&nbsp;&nbsp;{{ menuname }}</h4>
+        {% else %}
+            {% if year %}
+                <h4><i class="icon-align-right"></i>&nbsp;&nbsp;{{ year }}.{{ month }}</h4>
+            {% else %}
+                <h4><i class="icon-align-right"></i>&nbsp;&nbsp;文章目录</h4>
+            {% endif %}
+        {% endif %}
+    </div>
+</div>
+<hr/>
+
+{% for title in titles %}
+<div class="row">
+    <div class="span4">
+        <i class="icon-bookmark"></i>&nbsp;&nbsp;<a href="/blog/{{ title.id }}" >{{ title.name }}</a>
+    </div>
+    <div class="span2 muted text-right">
+        {{ title.ctime.year }}.{{ title.ctime.month }}.{{ title.ctime.day }}&nbsp;({{ title.comment_count }}/{{ title.scan }})
+    </div>
+</div>
+<hr/>
+{% endfor %}
+
+
+</div>
+</div>
+{% endblock %}
+
+{% block blk_tags %}
+{% include "tags.html" %}
+{% endblock %}
+
+{% block blk_arch %}
+{% include "arch.html" %}
+{% endblock %}
+
+{% block blk_stats %}
+{% include "stats.html" %}
+{% endblock %}
